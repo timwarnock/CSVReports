@@ -34,8 +34,9 @@ Decimal('103796.1')
 >>> reports.tax_detail.sum('Amount')
 Decimal('103796.1')
 >>> 
->>> reports.db.execute('SELECT name FROM sqlite_master WHERE type="table"').fetchall()
-[(u'billing_detail',), (u'tax_detail')]
+>>> taxes = reports.db.execute('SELECT b.id, b.price, t.amount FROM billing_detail b, tax_detail t WHERE t.billing_id = b.id').fetchall()
+>>> len(taxes)
+2549
 >>> 
 </pre>
 
