@@ -4,6 +4,7 @@ csv_reports
 CSVReports
 
 Python module for parsing CSV files into sqlite tables, represented as native python objects, e.g.,
+<pre>
 >>>
 >>> import Reports
 >>> foo = Reports.Report('foo.csv')
@@ -14,3 +15,4 @@ Python module for parsing CSV files into sqlite tables, represented as native py
 >>> foo.sum('price')
 Decimal('7412.50')
 >>> 
+</pre>
