@@ -15,6 +15,10 @@ Python module for parsing CSV files into sqlite tables, represented as native py
 >>> foo.sum('price')
 Decimal('7412.50')
 >>> 
+>>> everyother = foo[0:100:2]
+>>> len(everyother)
+50
+>>>
 </pre>
 
 Optionally, you can specify a table name and a datbase connection<br />
