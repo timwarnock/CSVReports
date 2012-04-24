@@ -135,7 +135,7 @@ class Report(collections.Mapping):
 			if key.step is not None:
 				qstep = ' AND ROWID %% %s = %s ' %(key.step, start+1 % key.step)
 			res = curs.execute('SELECT * FROM %s WHERE ROWID >= %s AND ROWID <= %s %s' 
-				%(self.table, start+1, stop - start, qstep)).fetchall()
+				%(self.table, start+1, stop, qstep)).fetchall()
 		else:
 			res = list(curs.execute('SELECT * FROM %s WHERE ROWID = %s' %(self.table, key+1)).fetchall()[0])
 		curs.close()
