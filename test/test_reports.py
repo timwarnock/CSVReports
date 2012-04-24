@@ -49,12 +49,12 @@ class test_reports(unittest.TestCase):
 		self.assertTrue('c0' in s.columns)
 		self.assertTrue('c1' in s.columns)
 
-	def test_report_splice(self):
+	def test_report_slice(self):
 		f = self.reports.fake_data
 		f.csv('temp_data', f[0:100:10])
 		self.assertEqual( len(self.reports.temp_data), 10 )
 
-	def test_report_splice_10(self):
+	def test_report_slice_10(self):
 		f = self.reports.fake_data
 		f.csv('temp_data', f[0:100:10])
 		t = self.reports.temp_data
@@ -64,7 +64,7 @@ class test_reports(unittest.TestCase):
 		self.assertEqual( t[2], f[20] )
 		self.assertEqual( t[9], f[90] )
 
-	def test_report_splice_7(self):
+	def test_report_slice_7(self):
 		f = self.reports.fake_data
 		f.csv('temp_data', f[3:100:7])
 		t = self.reports.temp_data
@@ -74,6 +74,17 @@ class test_reports(unittest.TestCase):
 		self.assertEqual( t[2], f[17] )
 		self.assertEqual( t[12], f[87] )
 		self.assertEqual( t[13], f[94] )
+
+	def test_report_slice_77(self):
+		f = self.reports.fake_data
+		f.csv('temp_data', f[103:200:7])
+		t = self.reports.temp_data
+		self.assertEqual( len(t), 14 )
+		self.assertEqual( t[0], f[103] )
+		self.assertEqual( t[1], f[110] )
+		self.assertEqual( t[2], f[117] )
+		self.assertEqual( t[12], f[187] )
+		self.assertEqual( t[13], f[194] )
 
 	def test_report_csv(self):
 		fd = self.reports.fake_data
