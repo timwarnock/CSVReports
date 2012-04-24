@@ -39,7 +39,7 @@ Decimal('103796.1')
 >>> 
 </pre>
 
-Optionally, you can specify a table name and a datbase connection<br />
+Optionally, you can specify a table name and a database connection<br />
 -- by default, the table name is extracted from the csv file
    and a per-instance in-memory sqlite3 connection will be used.
    In practice you'd only care about these parameters if you want
