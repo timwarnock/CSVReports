@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 # vim: set tabstop=4 shiftwidth=4 autoindent smartindent:
-import os, sys, unittest
+import logging, os, sys, unittest
 from decimal import *
 
 ## parent directory
 sys.path.insert(0, os.path.join( os.path.dirname(__file__), '..' ))
 import Reports
+
+## set logging level
+#logging.getLogger().setLevel(logging.DEBUG)
 
 class test_reports(unittest.TestCase):
 
@@ -13,7 +16,10 @@ class test_reports(unittest.TestCase):
 		self.reports = Reports.Reports('.')
 
 	def tearDown(self):
-		self.reports = None
+		self.reports.db.close()
+		del self.reports
+		if os.path.exists('temp_data._.csv'):
+			os.unlink('temp_data._.csv')
 
 	def test_existing_reports(self):
 		self.assertEqual( len(self.reports), 0 )
@@ -43,10 +49,36 @@ class test_reports(unittest.TestCase):
 		self.assertTrue('c0' in s.columns)
 		self.assertTrue('c1' in s.columns)
 
+	def test_report_splice(self):
+		f = self.reports.fake_data
+		f.csv('temp_data', f[0:100:10])
+		self.assertEqual( len(self.reports.temp_data), 10 )
+
+	def test_report_splice_10(self):
+		f = self.reports.fake_data
+		f.csv('temp_data', f[0:100:10])
+		t = self.reports.temp_data
+		self.assertEqual( len(t), 10 )
+		self.assertEqual( t[0], f[0] )
+		self.assertEqual( t[1], f[10] )
+		self.assertEqual( t[2], f[20] )
+		self.assertEqual( t[9], f[90] )
+
+	def test_report_splice_7(self):
+		f = self.reports.fake_data
+		f.csv('temp_data', f[3:100:7])
+		t = self.reports.temp_data
+		self.assertEqual( len(t), 14 )
+		self.assertEqual( t[0], f[3] )
+		self.assertEqual( t[1], f[10] )
+		self.assertEqual( t[2], f[17] )
+		self.assertEqual( t[12], f[87] )
+		self.assertEqual( t[13], f[94] )
+
 	def test_report_csv(self):
 		fd = self.reports.fake_data
-		fd.csv( 'tenlines', fd[0:10] )
-		self.assertEqual( len(self.reports.tenlines), 10 )
+		fd.csv('temp_data', fd[0:10])
+		self.assertEqual( len(self.reports.temp_data), 10 )
 
 	def test_reports_gets_coded_columns(self):
 		sd = self.reports.spam_data

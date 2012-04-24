@@ -61,16 +61,15 @@ class Report(collections.Mapping):
 	>>> 
 	'''
 
-	def __init__(self, filehint, table = None, conn = sqlite3.connect(':memory:')):
+	def __init__(self, filehint, table = None, conn = None):
 		self.filename = Reports.find_report(filehint)
 		self.info = []
-		self.asof = ''
-		self.fp = ''
-		self.vendor = ''
 		self.headers = []
 		self.columns = []
 		self.table = table
 		self.db = conn
+		if conn is None:
+			self.db = sqlite3.connect(':memory:')
 		self.db.text_factory = str
 		self.indexes = []
 		self._load_csv()
@@ -83,9 +82,6 @@ class Report(collections.Mapping):
 
 		# get report metadata
 		self.info = reader.next()
-		self.asof = self._info('asof')
-		self.fp = self._info('fp')
-		self.vendor = self._info('vendor')
 		self.headers = reader.next()
 		if not self.table:
 			self.table = self._info('Report').replace('.', '_').replace('-', '_')
@@ -135,7 +131,11 @@ class Report(collections.Mapping):
 		if isinstance( key, slice ):
 			start = 0 if key.start is None else key.start
 			stop = len(self) - key.start if key.stop is None else key.stop
-			res = curs.execute('SELECT * FROM %s WHERE ROWID >= %s AND ROWID < %s' %(self.table, start+1, stop+1 - start)).fetchall()
+			qstep = ''
+			if key.step is not None:
+				qstep = ' AND ROWID %% %s = %s ' %(key.step, start+1)
+			res = curs.execute('SELECT * FROM %s WHERE ROWID >= %s AND ROWID <= %s %s' 
+				%(self.table, start+1, stop - start, qstep)).fetchall()
 		else:
 			res = list(curs.execute('SELECT * FROM %s WHERE ROWID = %s' %(self.table, key+1)).fetchall()[0])
 		curs.close()
@@ -253,10 +253,12 @@ class Reports:
 	>>> 
 	'''
 
-	def __init__(self, reportdir = '.', conn = sqlite3.connect(':memory:')):
+	def __init__(self, reportdir = '.', conn = None):
 		self.reports = {}
 		self.reportdir = reportdir
 		self.db = conn
+		if conn is None:
+			self.db = sqlite3.connect(':memory:')
 
 	def __len__(self):
 		return len(self.reports)
