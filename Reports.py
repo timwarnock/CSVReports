@@ -237,7 +237,7 @@ class Reports:
 	Optionally, a database can be provided, otherwise a per-instance
 	in-memory sqlite3 database will be used.
 
-	>>> reports = Analyzer.Reports('/home/user/reports-1109')
+	>>> reports = Reports.Reports('/home/user/reports-1109')
 	>>> reports.billing_detail.sum('Tax Amount')
 	Decimal('103796.1')
 	>>> 
