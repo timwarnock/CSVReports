@@ -12,6 +12,9 @@ Python module for parsing CSV files into sqlite tables, represented as native py
 >>> len(foo)
 1241
 >>> 
+>>> foo.headers
+['id', 'price', 'description']
+>>>
 >>> foo.sum('price')
 Decimal('7412.50')
 >>> 
