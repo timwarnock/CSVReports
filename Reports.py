@@ -1,5 +1,5 @@
 import csv, glob, re, os, sys
-import collections
+import collections, codecs
 import sqlite3
 from decimal import Decimal
 
@@ -21,8 +21,8 @@ def write_csv(filename, data, headers, info):
 	write a custom csv file (that can be ingested as a Report object if needed)
 	'''
 	logging.debug('saving %s' % (filename))
-	fh = open(filename, 'w')
-	_csv = lambda raw: fh.write(u','.join(['"%s"'%(x) for x in raw]) + u'\n')
+	fh = codecs.open(filename, 'w', encoding='utf-8')
+	_csv = lambda raw: fh.write(u','.join(['"%s"'%(str(x).decode('utf-8', 'ignore')) for x in raw]) + u'\n')
 	_csv(info)
 	_csv(headers)
 	for row in data:
@@ -64,6 +64,9 @@ class Report(collections.Mapping):
 	def __init__(self, filehint, table = None, conn = None):
 		self.filename = Reports.find_report(filehint)
 		self.info = []
+		self.asof = ''
+		self.fp = ''
+		self.vendor = ''
 		self.headers = []
 		self.columns = []
 		self.table = table
@@ -77,11 +80,17 @@ class Report(collections.Mapping):
 	def _load_csv(self):
 		logging.debug('loading %s' %(self.filename))
 		curs = self.db.cursor()
-		fh = open(self.filename, "U")
-		reader = csv.reader(fh)
+		fh = open(self.filename, 'U')
+		def nonull(stream):
+			for line in stream:
+				yield line.replace('\x00', '')
+		reader = csv.reader(nonull(fh))
 
 		# get report metadata
 		self.info = reader.next()
+		self.asof = self._info('asof')
+		self.fp = self._info('fp')
+		self.vendor = self._info('vendor')
 		self.headers = reader.next()
 		if not self.table:
 			self.table = self._info('Report').replace('.', '_').replace('-', '_')
@@ -139,7 +148,7 @@ class Report(collections.Mapping):
 		else:
 			res = list(curs.execute('SELECT * FROM %s WHERE ROWID = %s' %(self.table, key+1)).fetchall()[0])
 		curs.close()
-		return res
+		return res 
 
 	def __iter__(self):
 		curs = self.db.cursor()
@@ -229,7 +238,7 @@ class Report(collections.Mapping):
 
 class Reports:
 	'''
-	Magic collection of billing reports
+	Magic collection of reports
 
 	Maintains a single shared database of all reports, lazily loaded
 	as needed, where the table name is the same as attribute name.
@@ -237,7 +246,7 @@ class Reports:
 	Optionally, a database can be provided, otherwise a per-instance
 	in-memory sqlite3 database will be used.
 
-	>>> reports = Reports.Reports('/home/user/reports-1109')
+	>>> reports = Analyzer.Reports('/home/user/reports-1109')
 	>>> reports.billing_detail.sum('Tax Amount')
 	Decimal('103796.1')
 	>>> 
