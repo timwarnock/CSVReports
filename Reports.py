@@ -21,13 +21,16 @@ def write_csv(filename, data, headers, info):
 	write a custom csv file (that can be ingested as a Report object if needed)
 	'''
 	logging.debug('saving %s' % (filename))
-	fh = codecs.open(filename, 'w', encoding='utf-8')
+	fh = codecs.open(filename + '.tmp', 'w', encoding='utf-8')
 	_csv = lambda raw: fh.write(u','.join(['"%s"'%(str(x).decode('utf-8', 'ignore')) for x in raw]) + u'\n')
 	_csv(info)
 	_csv(headers)
 	for row in data:
 		_csv(row)
 	fh.close()
+	if os.path.exists(filename):
+		os.remove(filename)
+	os.rename(filename + '.tmp', filename)
 
 
 class Report(collections.Mapping):
@@ -290,6 +293,9 @@ class Reports:
 			raise AttributeError
 		else:
 			return self.load(report)
+
+	def __iter__(self):
+		return iter(self.reports)
 
 	def load(self, report, index = None):
 		'''load a report by name, with optional index

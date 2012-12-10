@@ -26,6 +26,15 @@ class test_reports(unittest.TestCase):
 		self.reports.load('fake_data', 'spam')
 		self.assertEqual( len(self.reports), 1 )
 
+	def test_iter_reports(self):
+		self.reports.fake_data
+		self.reports.spam_data
+		iter_reports = []
+		for x in self.reports:
+			iter_reports.append(x)
+		self.assertTrue('fake_data' in iter_reports)
+		self.assertTrue('spam_data' in iter_reports)
+
 	def test_report_info(self):
 		fd = self.reports.fake_data
 		self.assertTrue('fake_data' in fd.info)
