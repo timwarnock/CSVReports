@@ -1,7 +1,5 @@
-csv_reports
-===========
-
 CSVReports
+===========
 
 Python module for parsing CSV files into sqlite tables, represented as native python objects, e.g.,
 <pre>
